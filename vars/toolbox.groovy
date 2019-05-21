@@ -48,12 +48,8 @@ def getToolboxVersion() {
 }
 
 def generateRandomBaseSystemName() {
-  String alphabet = (('A'..'N')+('P'..'Z')+('a'..'k')+('m'..'z')+('2'..'9')).join() 
-  def length = 6
-  id = new Random().with {
-    (1..length).collect{ alphabet[nextInt(alphabet.length())] }.join()
-  }
-  return "testcase_${id}"
+  def random = new Random()
+  return String.format("testcase_%08x%08x", random.nextInt(), random.nextInt())
 }
 
 def runToolbox(Map conf) {
