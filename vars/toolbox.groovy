@@ -17,7 +17,8 @@ def importOpenAPI(Map conf) {
   def targetSystemName = (conf.environmentName != null ? "${conf.environmentName}_" : "") + conf.baseSystemName + "_${major}"
 
   def commandLine = "3scale import openapi -t ${targetSystemName} -d ${conf.destination} /artifacts/${baseName}"
-  def result = runToolbox(commandLine: commandLine, 
+  def result = runToolbox(openshift: conf.openshift != null ? conf.openshift : openshift,
+                          commandLine: commandLine,
                           jobName: "import",
                           openAPI: [
                             "filename": baseName,
@@ -25,6 +26,13 @@ def importOpenAPI(Map conf) {
                           ],
                           toolboxConfig: conf.toolboxConfig)
   echo result.stdout
+}
+
+def getToolboxVersion(Map conf) {
+  def result = runToolbox(openshift: conf.openshift != null ? conf.openshift : openshift,
+                          commandLine: "3scale -v",
+                          jobName: "version")
+  return result.stdout
 }
 
 def basename(path) {
@@ -41,12 +49,6 @@ def readOpenAPISpecificationFile(fileName) {
   }
 }
 
-def getToolboxVersion() {
-  def result = runToolbox(commandLine: "3scale -v",
-                          jobName: "version")
-  return result.stdout
-}
-
 def generateRandomBaseSystemName() {
   def random = new Random()
   return String.format("testcase_%08x%08x", random.nextInt(), random.nextInt())
@@ -59,6 +61,7 @@ def runToolbox(Map conf) {
   assert conf.commandLine != null
 
   def defaultToolboxConf = [
+    "openshift": openshift,
     "toolboxConfig": null,
     "openAPI": null,
     "image": "quay.io/redhat/3scale-toolbox:v0.10.0",
@@ -69,6 +72,10 @@ def runToolbox(Map conf) {
 
   // Apply default values
   conf = defaultToolboxConf + conf
+
+  // replace the global openshift variable of the OpenShift Client plugin by
+  // the one coming from the pipeline
+  def openshift = conf.openshift
 
   if (conf.toolboxConfig != null && conf.toolboxConfig.configFileId != null) {
     // Generate a default secret name if none has been provided 
@@ -82,7 +89,7 @@ def runToolbox(Map conf) {
     echo "Creating a secret named ${conf.toolboxConfig.secretName} containing file ${conf.toolboxConfig.configFileId}..."
     configFileProvider([configFile(fileId: conf.toolboxConfig.configFileId, variable: 'TOOLBOX_CONFIG')]) {
         def toolboxConfig = readFile(TOOLBOX_CONFIG)
-        createSecret(conf.toolboxConfig.secretName, [ ".3scalerc.yaml": toolboxConfig ])
+        createSecret(openshift, conf.toolboxConfig.secretName, [ ".3scalerc.yaml": toolboxConfig ])
       }
   }
 
@@ -90,7 +97,7 @@ def runToolbox(Map conf) {
   if (conf.openAPI != null) {
     oasConfigMapName = "3scale-toolbox-${JOB_BASE_NAME}-${BUILD_NUMBER}-openapi"
     echo "Creating a configMap named ${oasConfigMapName} containing the OpenAPI file..."
-    createConfigMap(oasConfigMapName, [ (conf.openAPI.filename): conf.openAPI.content ])
+    createConfigMap(openshift, oasConfigMapName, [ (conf.openAPI.filename): conf.openAPI.content ])
   }
 
   def jobName = "${JOB_BASE_NAME}-${BUILD_NUMBER}-${conf.jobName}"
@@ -255,7 +262,7 @@ def getPodDetails(pod) {
   ]
 }
 
-def createConfigMap(configMapName, content) {
+def createConfigMap(openshift, configMapName, content) {
   def configMapSpecs = [
     "apiVersion": "v1",
     "kind": "ConfigMap",
@@ -272,7 +279,7 @@ def createConfigMap(configMapName, content) {
   openshift.apply(configMapSpecs) 
 }
 
-def createSecret(secretName, content) {
+def createSecret(openshift, secretName, content) {
   def secretSpecs = [
     "apiVersion": "v1",
     "kind": "Secret",
