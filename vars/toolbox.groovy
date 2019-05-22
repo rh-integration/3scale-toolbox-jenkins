@@ -26,6 +26,27 @@ def importOpenAPI(Map conf) {
                           ],
                           toolboxConfig: conf.toolboxConfig)
   echo result.stdout
+
+  result = applyApplicationPlan(openshift: conf.openshift != null ? conf.openshift : openshift,
+                                destination: conf.destination,
+                                serviceSystemName: targetSystemName,
+                                planSystemName: "test_plan",
+                                planDisplayName: "Test Plan")
+  echo result.stdout
+}
+
+def applyApplicationPlan(Map conf) {
+  assert conf.destination != null
+  assert conf.serviceSystemName != null
+  assert conf.planSystemName != null
+  assert conf.planDisplayName != null
+
+  def commandLine = "3scale application-plan apply ${conf.destination} ${conf.serviceSystemName} ${conf.planSystemName} -n '${conf.planDisplayName}'"
+  def result = runToolbox(openshift: conf.openshift != null ? conf.openshift : openshift,
+                          commandLine: commandLine,
+                          jobName: "apply-application-plan",
+                          toolboxConfig: conf.toolboxConfig)
+  return result
 }
 
 def getToolboxVersion(Map conf) {
