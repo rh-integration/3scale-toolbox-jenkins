@@ -186,6 +186,25 @@ def runToolbox(Map conf) {
       }
     }
   } finally {
+    // Delete the temporary configMap containing the OAS file
+    if (oasConfigMapName != null) {
+      try {
+        openshift.selector('configMap', oasConfigMapName).delete()
+      } catch (e2) { // Best effort
+        echo "cannot delete the configMap ${oasConfigMapName}: ${e2}"
+      }
+    }
+
+    // Delete the temporary secret
+    if (conf.toolboxConfig != null && conf.toolboxConfig.configFileId != null) {
+      try {
+        openshift.selector('secret', conf.toolboxConfig.secretName).delete()
+      } catch (e2) { // Best effort
+        echo "cannot delete the secret ${conf.toolboxConfig.secretName}: ${e2}"
+      }
+    }
+
+    // If the job has been created, check its status
     if (job != null) {
       def jobStatus = getJobStatus(job.object())
       echo "job ${job.name()} has status '${jobStatus.status}' and reason '${jobStatus.reason}'"
@@ -203,41 +222,26 @@ def runToolbox(Map conf) {
         }
       }
 
-      if (result != null && result.podPhase == "Failed") {
-        echo "RC: ${result.status}"
-        echo "STDOUT:"
-        echo "-------"
-        echo result.stdout
-        echo "STDERR:"
-        echo "-------"
-        echo result.stderr
-
-        error("job ${job.name()} exited with '${jobStatus.status}' and reason '${jobStatus.reason}'")
-      }
-
       // Delete the job
       try {
         openshift.selector('job', jobName).delete()
       } catch (e2) { // Best effort
         echo "cannot delete the job ${jobName}: ${e2}"
       }
-    }
 
-    // Delete the temporary configMap containing the OAS file
-    if (oasConfigMapName != null) {
-      try {
-        openshift.selector('configMap', oasConfigMapName).delete()
-      } catch (e2) { // Best effort
-        echo "cannot delete the configMap ${oasConfigMapName}: ${e2}"
-      }
-    }
+      if (jobStatus.status != "Succeeded") {
+        // If there is at least a pod that failed, show its logs
+        if (result != null) {
+          echo "RC: ${result.status}"
+          echo "STDOUT:"
+          echo "-------"
+          echo result.stdout
+          echo "STDERR:"
+          echo "-------"
+          echo result.stderr
+        }
 
-    // Delete the temporary secret
-    if (conf.toolboxConfig != null && conf.toolboxConfig.configFileId != null) {
-      try {
-        openshift.selector('secret', conf.toolboxConfig.secretName).delete()
-      } catch (e2) { // Best effort
-        echo "cannot delete the secret ${conf.toolboxConfig.secretName}: ${e2}"
+        error("job ${job.name()} exited with '${jobStatus.status}' and reason '${jobStatus.reason}'")
       }
     }
   }
