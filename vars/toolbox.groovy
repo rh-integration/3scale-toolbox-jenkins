@@ -16,24 +16,17 @@ def importOpenAPI(Map conf) {
   // Compute the target system_name
   def targetSystemName = (conf.environmentName != null ? "${conf.environmentName}_" : "") + conf.baseSystemName + "_${major}"
 
-  def commandLine = "3scale import openapi -t ${targetSystemName} -d ${conf.destination} /artifacts/${baseName}"
-  def result = runToolbox(openshift: conf.openshift != null ? conf.openshift : openshift,
-                          commandLine: commandLine,
-                          jobName: "import",
-                          openAPI: [
-                            "filename": baseName,
-                            "content": readFile(conf.oasFile)
-                          ],
-                          toolboxConfig: conf.toolboxConfig)
-  echo result.stdout
-
-  result = applyApplicationPlan(openshift: conf.openshift != null ? conf.openshift : openshift,
-                                destination: conf.destination,
-                                serviceSystemName: targetSystemName,
-                                planSystemName: "test_plan",
-                                planDisplayName: "Test Plan",
-                                toolboxConfig: conf.toolboxConfig)
-  echo result.stdout
+  def globalOptions = getGlobalToolboxOptions(conf)
+  def commandLine = "3scale import openapi ${globalOptions} -t ${targetSystemName} -d ${conf.destination} /artifacts/${baseName}"
+  runToolbox(openshift: conf.openshift != null ? conf.openshift : openshift,
+             commandLine: commandLine,
+             jobName: "import",
+             openAPI: [
+               "filename": baseName,
+               "content": readFile(conf.oasFile)
+             ],
+             toolboxConfig: conf.toolboxConfig)
+  return targetSystemName
 }
 
 def applyApplicationPlan(Map conf) {
@@ -42,12 +35,12 @@ def applyApplicationPlan(Map conf) {
   assert conf.planSystemName != null
   assert conf.planDisplayName != null
 
-  def commandLine = "3scale application-plan apply ${conf.destination} ${conf.serviceSystemName} ${conf.planSystemName} -n '${conf.planDisplayName}'"
-  def result = runToolbox(openshift: conf.openshift != null ? conf.openshift : openshift,
-                          commandLine: commandLine,
-                          jobName: "apply-application-plan",
-                          toolboxConfig: conf.toolboxConfig)
-  return result
+  def globalOptions = getGlobalToolboxOptions(conf)
+  def commandLine = "3scale application-plan apply ${conf.destination} ${conf.serviceSystemName} ${conf.planSystemName} ${globalOptions} -n '${conf.planDisplayName}'"
+  runToolbox(openshift: conf.openshift != null ? conf.openshift : openshift,
+             commandLine: commandLine,
+             jobName: "apply-application-plan",
+             toolboxConfig: conf.toolboxConfig)
 }
 
 def getToolboxVersion(Map conf) {
@@ -55,6 +48,17 @@ def getToolboxVersion(Map conf) {
                           commandLine: "3scale -v",
                           jobName: "version")
   return result.stdout
+}
+
+def getGlobalToolboxOptions(Map conf) {
+  def options = ""
+  if (conf.insecure != null && conf.insecure) {
+    options += "-k "
+  }
+  if (conf.verbose != null && conf.verbose) {
+    options += "--verbose "
+  }
+  return options
 }
 
 def basename(path) {
