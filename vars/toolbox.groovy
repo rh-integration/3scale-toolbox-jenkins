@@ -229,7 +229,7 @@ def runToolbox(Map conf) {
         echo "cannot delete the job ${jobName}: ${e2}"
       }
 
-      if (jobStatus.status != "Succeeded") {
+      if (jobStatus.status != "Complete") {
         // If there is at least a pod that failed, show its logs
         if (result != null) {
           echo "RC: ${result.status}"
