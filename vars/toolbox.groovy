@@ -36,7 +36,9 @@ def getToolboxVersion(Map conf) {
 }
 
 def basename(path) {
-  return path.drop(path.lastIndexOf("/") != -1 ? path.lastIndexOf("/") : 0)
+  def filename = path.drop(path.lastIndexOf("/") != -1 ? path.lastIndexOf("/") + 1 : 0)
+  filename = filename.replaceAll("[^-._a-zA-Z0-9]", "_")
+  return filename
 }
 
 def readOpenAPISpecificationFile(fileName) {
