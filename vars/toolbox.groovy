@@ -31,7 +31,8 @@ def importOpenAPI(Map conf) {
                                 destination: conf.destination,
                                 serviceSystemName: targetSystemName,
                                 planSystemName: "test_plan",
-                                planDisplayName: "Test Plan")
+                                planDisplayName: "Test Plan",
+                                toolboxConfig: conf.toolboxConfig)
   echo result.stdout
 }
 
