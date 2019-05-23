@@ -50,6 +50,25 @@ def getToolboxVersion(Map conf) {
   return result.stdout
 }
 
+def createApplication(Map conf) {
+  // TODO
+  // see https://issues.jboss.org/browse/THREESCALE-2425
+  throw new Exception("NOT_IMPLEMENTED")
+}
+
+def readProxy(Map conf) {
+  // TODO
+  // see https://issues.jboss.org/browse/THREESCALE-2405
+  throw new Exception("NOT_IMPLEMENTED")
+}
+
+def promoteToProduction(Map conf) {
+  // TODO
+  // We need a command to promote a proxy to production
+  // see https://issues.jboss.org/browse/THREESCALE-2405
+  throw new Exception("NOT_IMPLEMENTED")
+}
+
 def getGlobalToolboxOptions(Map conf) {
   def options = ""
   if (conf.insecure != null && conf.insecure) {
