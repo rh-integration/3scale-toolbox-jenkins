@@ -95,12 +95,12 @@ package fr.itix
           job = openshift.create(jobSpecs)
 
           int jobTimeout = 2 + (int)(conf.activeDeadlineSeconds / 60.0f)
-          util.log "Waiting ${jobTimeout} minutes for the job to complete..."
+          echo "Waiting ${jobTimeout} minutes for the job to complete..."
           timeout(jobTimeout) {
             // Wait for the job to complete, either Succeeded or Failed
             job.watch {
               def jobStatus = getJobStatus(it.object())
-              util.log "Job ${it.name()}: succeeded = ${jobStatus.succeeded}, failed = ${jobStatus.failed}, status = ${jobStatus.status}, reason = ${jobStatus.reason}"
+              echo "Job ${it.name()}: succeeded = ${jobStatus.succeeded}, failed = ${jobStatus.failed}, status = ${jobStatus.status}, reason = ${jobStatus.reason}"
               
               // Exit the watch loop when the Job has one successful pod or failed
               return jobStatus.succeeded > 0 || jobStatus.status == "Failed"
@@ -112,14 +112,14 @@ package fr.itix
             try {
               openshift.selector('configMap', oasConfigMapName).delete()
             } catch (e2) { // Best effort
-              util.log "cannot delete the configMap ${oasConfigMapName}: ${e2}"
+              echo "cannot delete the configMap ${oasConfigMapName}: ${e2}"
             }
           }
 
           // If the job has been created, check its status
           if (job != null) {
             def jobStatus = getJobStatus(job.object())
-            util.log "job ${job.name()} has status '${jobStatus.status}' and reason '${jobStatus.reason}'"
+            echo "job ${job.name()} has status '${jobStatus.status}' and reason '${jobStatus.reason}'"
 
             // Iterate over pods to find:
             //  - the pod that succeeded
@@ -138,22 +138,22 @@ package fr.itix
             try {
               openshift.selector('job', jobName).delete()
             } catch (e2) { // Best effort
-              util.log "cannot delete the job ${jobName}: ${e2}"
+              echo "cannot delete the job ${jobName}: ${e2}"
             }
 
             if (jobStatus.status != "Complete") {
               // If there is at least a pod that failed, show its logs
               if (result != null) {
-                util.log "RC: ${result.status}"
-                util.log "STDOUT:"
-                util.log "-------"
-                util.log result.stdout
-                util.log "STDERR:"
-                util.log "-------"
-                util.log result.stderr
+                echo "RC: ${result.status}"
+                echo "STDOUT:"
+                echo "-------"
+                echo result.stdout
+                echo "STDERR:"
+                echo "-------"
+                echo result.stderr
               }
 
-              util.abort("job ${job.name()} exited with '${jobStatus.status}' and reason '${jobStatus.reason}'")
+              error("job ${job.name()} exited with '${jobStatus.status}' and reason '${jobStatus.reason}'")
             }
           }
         }
