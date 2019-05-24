@@ -11,8 +11,6 @@ class OpenAPI2 {
     OpenAPI2(Map conf) {
         assert conf.filename != null
         this.filename = conf.filename
-        this.content = readOpenAPISpecificationFile(conf.filename)
-        this.parseOpenAPISpecificationFile()
     }
 
     static Map readOpenAPISpecificationFile(fileName) {
@@ -26,6 +24,7 @@ class OpenAPI2 {
     }
 
     void parseOpenAPISpecificationFile() {
+        this.content = readOpenAPISpecificationFile(conf.filename)
         assert content.swagger == "2.0"
         this.version = content.info.version
         assert this.version != null

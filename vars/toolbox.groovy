@@ -14,6 +14,7 @@ ThreescaleService prepareThreescaleService(Map conf) {
   assert conf.service != null
 
   OpenAPI2 openapi = new OpenAPI2(conf.openapi)
+  openapi.parseOpenAPISpecificationFile()
   ThreescaleEnvironment environment = new ThreescaleEnvironment(conf.environment)
   ToolboxConfiguration toolbox = new ToolboxConfiguration(conf.toolbox)
   ThreescaleService service = new ThreescaleService([ "openapi": openapi, "environment": environment, "toolbox": toolbox ] + conf.service)
