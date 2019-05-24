@@ -98,7 +98,7 @@ class ToolboxConfiguration {
 
         def job = null
         try {
-          job = this.openshiftClient.create(jobSpecs)
+          job = openshift.create(jobSpecs)
 
           int jobTimeout = 2 + (int)(this.activeDeadlineSeconds / 60.0f)
           util.log "Waiting ${jobTimeout} minutes for the job to complete..."
