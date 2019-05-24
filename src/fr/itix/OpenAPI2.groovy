@@ -21,3 +21,13 @@ class OpenAPI2 {
         this.majorVersion = version.tokenize(".")[0]
     }
 }
+
+def readOpenAPISpecificationFile(fileName) {
+    if (fileName.toLowerCase().endsWith(".json")) {
+        return readJSON(file: fileName)
+    } else if (fileName.toLowerCase().endsWith(".yaml") || fileName.toLowerCase().endsWith(".yml")) {
+        return readYaml(file: fileName)
+    } else {
+        throw new Exception("Can't decide between JSON and YAML on ${fileName}")
+    }
+}
