@@ -165,13 +165,6 @@ package fr.itix
     return result
   }
 
-  String getToolboxVersion(ToolboxConfiguration conf) {
-    def result = runToolbox(conf,
-                            [ commandLine: "3scale -v",
-                              jobName: "version" ])
-    return result.stdout
-  }
-
   def getJobStatus(obj) {
     return [
       "succeeded": obj.status.succeeded != null ? obj.status.succeeded : 0,
