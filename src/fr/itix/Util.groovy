@@ -16,3 +16,7 @@ def readOpenAPISpecificationFile(fileName) {
         throw new Exception("Can't decide between JSON and YAML on ${fileName}")
     }
 }
+
+def readFile(String filename) {
+    return readFile: filename
+}

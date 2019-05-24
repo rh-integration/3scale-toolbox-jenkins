@@ -9,11 +9,13 @@ class ThreescaleService {
   ThreescaleEnvironment environment
 
   void importOpenAPI() {
+    Util util = new Util()
+
     if (this.environment.stagingPublicBaseURL != null || this.environment.productionPublicBaseURL != null) {
       // See https://issues.jboss.org/browse/THREESCALE-2607
       throw new Exception("NOT_IMPLEMENTED")
     }
-    
+
     // Compute the target system_name
     this.environment.targetSystemName = (this.environment.environmentName != null ? "${this.environment.environmentName}_" : "") + this.environment.baseSystemName + "_${this.openapi.majorVersion}"
 
@@ -24,7 +26,7 @@ class ThreescaleService {
                        jobName: "import",
                        openAPI: [
                          "filename": baseName,
-                         "content": readFile(this.openapi.filename)
+                         "content": util.readFile(this.openapi.filename)
                        ])
   }
   
