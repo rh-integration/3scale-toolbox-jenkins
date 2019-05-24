@@ -19,9 +19,9 @@ class ToolboxConfiguration {
   }
 
   String getToolboxVersion() {
-    def result = runToolbox(this,
-                            [ commandLine: "3scale -v",
-                              jobName: "version" ])
+    def result = toolbox.runToolbox(this,
+                                    [ commandLine: "3scale -v",
+                                      jobName: "version" ])
     return result.stdout
   }
 }
