@@ -14,6 +14,7 @@ class ToolboxConfiguration {
   String BUILD_NUMBER
 
   def runToolbox(Map conf) {
+    Util util = new Util()
     def result = null
 
     assert conf.jobName != null
@@ -26,7 +27,7 @@ class ToolboxConfiguration {
     def oasConfigMapName = null
     if (conf.openAPI != null) {
       oasConfigMapName = "3scale-toolbox-${JOB_BASE_NAME}-${BUILD_NUMBER}-openapi"
-      Util.log "Creating a configMap named ${oasConfigMapName} containing the OpenAPI file..."
+      util.log "Creating a configMap named ${oasConfigMapName} containing the OpenAPI file..."
       createConfigMap(openshift, oasConfigMapName, [ (conf.openAPI.filename): conf.openAPI.content ])
     }
 
@@ -102,12 +103,12 @@ class ToolboxConfiguration {
       job = this.openshiftClient.create(jobSpecs)
 
       int jobTimeout = 2 + (int)(this.activeDeadlineSeconds / 60.0f)
-      Util.log "Waiting ${jobTimeout} minutes for the job to complete..."
+      util.log "Waiting ${jobTimeout} minutes for the job to complete..."
       timeout(jobTimeout) {
         // Wait for the job to complete, either Succeeded or Failed
         job.watch {
           def jobStatus = getJobStatus(it.object())
-          Util.log "Job ${it.name()}: succeeded = ${jobStatus.succeeded}, failed = ${jobStatus.failed}, status = ${jobStatus.status}, reason = ${jobStatus.reason}"
+          util.log "Job ${it.name()}: succeeded = ${jobStatus.succeeded}, failed = ${jobStatus.failed}, status = ${jobStatus.status}, reason = ${jobStatus.reason}"
           
           // Exit the watch loop when the Job has one successful pod or failed
           return jobStatus.succeeded > 0 || jobStatus.status == "Failed"
@@ -119,14 +120,14 @@ class ToolboxConfiguration {
         try {
           openshift.selector('configMap', oasConfigMapName).delete()
         } catch (e2) { // Best effort
-          Util.log "cannot delete the configMap ${oasConfigMapName}: ${e2}"
+          util.log "cannot delete the configMap ${oasConfigMapName}: ${e2}"
         }
       }
 
       // If the job has been created, check its status
       if (job != null) {
         def jobStatus = getJobStatus(job.object())
-        Util.log "job ${job.name()} has status '${jobStatus.status}' and reason '${jobStatus.reason}'"
+        util.log "job ${job.name()} has status '${jobStatus.status}' and reason '${jobStatus.reason}'"
 
         // Iterate over pods to find:
         //  - the pod that succeeded
@@ -145,22 +146,22 @@ class ToolboxConfiguration {
         try {
           openshift.selector('job', jobName).delete()
         } catch (e2) { // Best effort
-          Util.log "cannot delete the job ${jobName}: ${e2}"
+          util.log "cannot delete the job ${jobName}: ${e2}"
         }
 
         if (jobStatus.status != "Complete") {
           // If there is at least a pod that failed, show its logs
           if (result != null) {
-            Util.log "RC: ${result.status}"
-            Util.log "STDOUT:"
-            Util.log "-------"
-            Util.log result.stdout
-            Util.log "STDERR:"
-            Util.log "-------"
-            Util.log result.stderr
+            util.log "RC: ${result.status}"
+            util.log "STDOUT:"
+            util.log "-------"
+            util.log result.stdout
+            util.log "STDERR:"
+            util.log "-------"
+            util.log result.stderr
           }
 
-          Util.abort("job ${job.name()} exited with '${jobStatus.status}' and reason '${jobStatus.reason}'")
+          util.abort("job ${job.name()} exited with '${jobStatus.status}' and reason '${jobStatus.reason}'")
         }
       }
     }
