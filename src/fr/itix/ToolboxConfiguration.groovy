@@ -15,6 +15,10 @@ class ToolboxConfiguration {
   Toolbox toolbox = new Toolbox()
 
   def runToolbox(Map conf) {
-    toolbox.runToolbox(this, conf)
+    return toolbox.runToolbox(this, conf)
+  }
+
+  String getToolboxVersion() {
+    return toolbox.getToolboxVersion(this, conf)
   }
 }

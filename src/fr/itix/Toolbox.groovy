@@ -165,9 +165,10 @@ package fr.itix
     return result
   }
 
-  String getToolboxVersion(Map conf) {
-    def result = runToolbox(commandLine: "3scale -v",
-                            jobName: "version")
+  String getToolboxVersion(ToolboxConfiguration conf) {
+    def result = runToolbox(conf,
+                            [ commandLine: "3scale -v",
+                              jobName: "version" ])
     return result.stdout
   }
 
@@ -206,4 +207,3 @@ package fr.itix
     content.each{ k, v -> configMapSpecs.data[k] = v }
     openshift.apply(configMapSpecs) 
   }
-  
