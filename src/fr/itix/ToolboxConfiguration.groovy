@@ -13,6 +13,8 @@ class ToolboxConfiguration {
   String JOB_BASE_NAME
   String BUILD_NUMBER
   Toolbox toolbox = new Toolbox()
+  boolean insecure = false
+  boolean verbose = false
 
   def runToolbox(Map conf) {
     return toolbox.runToolbox(this, conf)
@@ -24,4 +26,16 @@ class ToolboxConfiguration {
                                       jobName: "version" ])
     return result.stdout
   }
+
+  String getGlobalToolboxOptions() {
+      def options = ""
+      if (this.insecure) {
+          options += "-k "
+      }
+      if (this.verbose) {
+          options += "--verbose "
+      }
+      return options
+  }
+
 }
