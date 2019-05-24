@@ -13,7 +13,7 @@ class OpenAPI2 {
         this.filename = conf.filename
     }
 
-    static def readOpenAPISpecificationFile(fileName) {
+    def readOpenAPISpecificationFile(fileName) {
         if (fileName.toLowerCase().endsWith(".json")) {
             return readJSON(file: fileName)
         } else if (fileName.toLowerCase().endsWith(".yaml") || fileName.toLowerCase().endsWith(".yml")) {
