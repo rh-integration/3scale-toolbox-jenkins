@@ -18,5 +18,5 @@ def readOpenAPISpecificationFile(fileName) {
 }
 
 def readFile(String filename) {
-    return readFile: filename
+    return readFile(file: filename)
 }
