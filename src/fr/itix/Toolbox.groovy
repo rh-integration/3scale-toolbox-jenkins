@@ -14,8 +14,8 @@ package fr.itix
     assert call.jobName != null
     assert call.commandLine != null
 
-    //openshift.withCluster() {
-      //openshift.withProject(conf.openshiftProject) {
+    openshift.withCluster() {
+      openshift.withProject(conf.openshiftProject) {
         def oasConfigMapName = null
         if (call.openAPI != null) {
           oasConfigMapName = "3scale-toolbox-${JOB_BASE_NAME}-${BUILD_NUMBER}-openapi"
@@ -158,9 +158,8 @@ package fr.itix
           }
         }
             
-      //}
-    //}
-
+      }
+    }
 
     return result
   }
