@@ -7,7 +7,7 @@ package fr.itix
  * They can however implement methods, outside of the scope of an enclosing class,
  * which in turn invoke Pipeline steps.
  */
-static def readOpenAPISpecificationFile(fileName) {
+def readOpenAPISpecificationFile(fileName) {
     if (fileName.toLowerCase().endsWith(".json")) {
         return readJSON(file: fileName)
     } else if (fileName.toLowerCase().endsWith(".yaml") || fileName.toLowerCase().endsWith(".yml")) {
