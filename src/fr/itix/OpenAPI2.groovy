@@ -13,16 +13,6 @@ class OpenAPI2 {
         this.filename = conf.filename
     }
 
-    def readOpenAPISpecificationFile(fileName) {
-        if (fileName.toLowerCase().endsWith(".json")) {
-            return readJSON(file: fileName)
-        } else if (fileName.toLowerCase().endsWith(".yaml") || fileName.toLowerCase().endsWith(".yml")) {
-            return readYaml(file: fileName)
-        } else {
-            throw new Exception("Can't decide between JSON and YAML on ${fileName}")
-        }
-    }
-
     void parseOpenAPISpecificationFile() {
         this.content = readOpenAPISpecificationFile(this.filename)
         assert content.swagger == "2.0"
