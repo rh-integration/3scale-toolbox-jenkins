@@ -4,7 +4,7 @@ package fr.itix
 
 class OpenAPI2 {
     String filename
-    Map content
+    def content
     String version
     String majorVersion
 
@@ -13,11 +13,11 @@ class OpenAPI2 {
         this.filename = conf.filename
     }
 
-    static Map readOpenAPISpecificationFile(fileName) {
+    static def readOpenAPISpecificationFile(fileName) {
         if (fileName.toLowerCase().endsWith(".json")) {
-            return (Map)readJSON(file: fileName)
+            return readJSON(file: fileName)
         } else if (fileName.toLowerCase().endsWith(".yaml") || fileName.toLowerCase().endsWith(".yml")) {
-            return (Map)readYaml(file: fileName)
+            return readYaml(file: fileName)
         } else {
             throw new Exception("Can't decide between JSON and YAML on ${fileName}")
         }
