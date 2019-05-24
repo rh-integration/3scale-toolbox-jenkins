@@ -14,7 +14,7 @@ class OpenAPI2 {
     }
 
     void parseOpenAPISpecificationFile() {
-        this.content = Util.readOpenAPISpecificationFile(this.filename)
+        this.content = new Util().readOpenAPISpecificationFile(this.filename)
         assert content.swagger == "2.0"
         this.version = content.info.version
         assert this.version != null
