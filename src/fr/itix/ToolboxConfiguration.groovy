@@ -10,6 +10,8 @@ class ToolboxConfiguration {
   String backoffLimit = 2 // three attempts (one first try + two retries)
   String imagePullPolicy = "IfNotPresent"
   int activeDeadlineSeconds = 90
+  String JOB_BASE_NAME
+  String BUILD_NUMBER
 
   def runToolbox(Map conf) {
     def result = null

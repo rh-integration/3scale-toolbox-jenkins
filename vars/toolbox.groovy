@@ -16,7 +16,7 @@ ThreescaleService prepareThreescaleService(Map conf) {
   OpenAPI2 openapi = new OpenAPI2(conf.openapi)
   openapi.parseOpenAPISpecificationFile()
   ThreescaleEnvironment environment = new ThreescaleEnvironment(conf.environment)
-  ToolboxConfiguration toolbox = new ToolboxConfiguration(conf.toolbox)
+  ToolboxConfiguration toolbox = new ToolboxConfiguration(conf.toolbox + ["JOB_BASE_NAME": JOB_BASE_NAME, "BUILD_NUMBER": BUILD_NUMBER])
   ThreescaleService service = new ThreescaleService([ "openapi": openapi, "environment": environment, "toolbox": toolbox ] + conf.service)
 
   return service
