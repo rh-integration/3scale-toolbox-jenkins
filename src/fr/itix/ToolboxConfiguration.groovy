@@ -114,6 +114,8 @@ class ToolboxConfiguration {
           return jobStatus.succeeded > 0 || jobStatus.status == "Failed"
         }
       }
+    } catch (e) {
+      util.log(e)
     } finally {
       // Delete the temporary configMap containing the OAS file
       if (oasConfigMapName != null) {
