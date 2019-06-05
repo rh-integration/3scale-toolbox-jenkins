@@ -16,6 +16,11 @@ class ThreescaleService {
       throw new Exception("NOT_IMPLEMENTED")
     }
 
+    if (this.environment.privateBaseUrl != null) {
+      // See https://issues.jboss.org/browse/THREESCALE-2734
+      throw new Exception("NOT_IMPLEMENTED")
+    }
+
     // Compute the target system_name
     this.environment.targetSystemName = (this.environment.environmentName != null ? "${this.environment.environmentName}_" : "") + this.environment.baseSystemName + "_${this.openapi.majorVersion}"
 

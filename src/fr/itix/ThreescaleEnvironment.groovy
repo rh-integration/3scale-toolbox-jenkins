@@ -8,5 +8,6 @@ class ThreescaleEnvironment {
   String environmentName
   String stagingPublicBaseURL
   String productionPublicBaseURL
+  String privateBaseUrl
 }
 
