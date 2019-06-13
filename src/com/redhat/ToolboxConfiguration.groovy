@@ -6,7 +6,7 @@ class ToolboxConfiguration {
   String openshiftProject
   String destination
   String secretName
-  String image = "quay.io/redhat/3scale-toolbox:v0.10.0"
+  String image = "quay.io/redhat/3scale-toolbox:v0.11.0"
   String backoffLimit = 2 // three attempts (one first try + two retries)
   String imagePullPolicy = "IfNotPresent"
   int activeDeadlineSeconds = 90

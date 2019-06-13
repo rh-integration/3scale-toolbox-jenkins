@@ -20,3 +20,7 @@ def readOpenAPISpecificationFile(fileName) {
 def readFile(String filename) {
     return readFile(file: filename)
 }
+
+def readJSON(String json) {
+    return readJSON(text: json)
+}
