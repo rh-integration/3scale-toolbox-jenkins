@@ -1,6 +1,6 @@
 #!groovy
 
-package fr.itix
+package com.redhat
 
 /*
  * Library classes cannot directly call steps such as sh or git. 

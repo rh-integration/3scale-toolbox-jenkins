@@ -1,6 +1,6 @@
 #!groovy
 
-package fr.itix
+package com.redhat
 
 class ThreescaleEnvironment {
   String baseSystemName

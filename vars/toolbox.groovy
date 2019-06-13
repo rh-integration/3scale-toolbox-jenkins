@@ -1,6 +1,6 @@
 #!groovy
 
-package fr.itix
+package com.redhat
 
 String generateRandomBaseSystemName() {
   def random = new Random()
