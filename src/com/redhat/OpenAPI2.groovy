@@ -1,6 +1,6 @@
 #!groovy
 
-package fr.itix
+package com.redhat
 
 class OpenAPI2 {
     String filename

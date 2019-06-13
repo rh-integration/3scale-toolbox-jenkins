@@ -1,6 +1,6 @@
 #!groovy
 
-package fr.itix
+package com.redhat
 
 class ApplicationPlan {
     String systemName
