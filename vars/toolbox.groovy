@@ -13,6 +13,7 @@ ThreescaleService prepareThreescaleService(Map conf) {
   assert conf.toolbox != null
   assert conf.service != null
   assert conf.applicationPlans != null
+  assert conf.applications != null
 
   List<ApplicationPlan> plans = []
   conf.applicationPlans.each{
@@ -24,11 +25,23 @@ ThreescaleService prepareThreescaleService(Map conf) {
     plans.add(plan)
   }
 
+
+  List<Application> apps = []
+  conf.applications.each{
+    if (it.account == null || it.name == null) {
+      throw new Exception("Missing property in application : name or account")
+    }
+
+    Application app = new Application(it)
+    apps.add(app)
+  }
+
+
   OpenAPI2 openapi = new OpenAPI2(conf.openapi)
   openapi.parseOpenAPISpecificationFile()
   ThreescaleEnvironment environment = new ThreescaleEnvironment(conf.environment)
   ToolboxConfiguration toolbox = new ToolboxConfiguration(conf.toolbox + ["JOB_BASE_NAME": JOB_BASE_NAME, "BUILD_NUMBER": BUILD_NUMBER])
-  ThreescaleService service = new ThreescaleService([ "openapi": openapi, "environment": environment, "toolbox": toolbox, applicationPlans: plans ] + conf.service)
+  ThreescaleService service = new ThreescaleService([ "openapi": openapi, "environment": environment, "toolbox": toolbox, applicationPlans: plans ,"applications":apps] + conf.service)
 
   return service
 }
