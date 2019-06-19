@@ -7,9 +7,10 @@ class Application {
     String name
     String description
     String plan
-    String service
-    boolean  resume= false
-    boolean suspend= false
+    // Disabled for now because of https://issues.jboss.org/browse/THREESCALE-2844
+    // boolean active = true
     String userkey
+    String clientId
+    String clientSecret
 
 }
