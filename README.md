@@ -29,6 +29,9 @@ Create the `ThreescaleService` with all the relevant information:
                    destination: "3scale-tenant",
                    secretName: "3scale-toolbox" ],
         service: [:],
+        applications: [
+            [ name: "my-test-app", description: "This is used for tests", plan: "test", account: "<CHANGE_ME>" ]
+        ],
         applicationPlans: [
           [ systemName: "test", name: "Test", defaultPlan: true, published: true ],
           [ systemName: "silver", name: "Silver" ],
@@ -74,5 +77,45 @@ Add a stage to create the Application Plans:
 ```groovy
   stage("Create an Application Plan") {
     service.applyApplicationPlans()
+  }
+```
+
+Add a global variable and a stage to create the test Application:
+
+```groovy
+def testApplicationCredentials = null
+
+[...]
+
+  stage("Create an Application") {
+    // Patch the test application with default credentials
+    testApplicationCredentials = toolbox.getDefaultApplicationCredentials(service, service.applications[0].name)
+    service.applications[0].setUserkey(testApplicationCredentials.userKey)
+    service.applications[0].setClientId(testApplicationCredentials.clientId)
+    service.applications[0].setClientSecret(testApplicationCredentials.clientSecret)
+    service.applyApplication()
+  }
+```
+
+Add a stage to run your integration tests:
+
+```groovy
+  stage("Run integration tests") {
+    // To run the integration tests when using APIcast SaaS instances, we need
+    // to fetch the proxy definition to extract the staging public url
+    def proxy = service.readProxy("sandbox")
+    sh """set -e +x
+    curl -f -w "ListBeers: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer -H 'api-key: ${testApplicationCredentials.userKey}'
+    curl -f -w "GetBeer: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer/Weissbier -H 'api-key: ${testApplicationCredentials.userKey}'
+    curl -f -w "GetBeer: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer/findByStatus/available -H 'api-key: ${testApplicationCredentials.userKey}'
+    """
+  }
+```
+
+Add a stage to promote your API to production:
+
+```groovy
+  stage("Promote to production") {
+    service.promoteToProduction()
   }
 ```

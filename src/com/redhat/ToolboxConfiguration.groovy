@@ -22,18 +22,18 @@ class ToolboxConfiguration {
 
   String getToolboxVersion() {
     def result = toolbox.runToolbox(this,
-                                    [ commandLine: "3scale -v",
+                                    [ commandLine: [ "3scale", "-v" ],
                                       jobName: "version" ])
     return result.stdout
   }
 
-  String getGlobalToolboxOptions() {
-      def options = ""
+  List<String> getGlobalToolboxOptions() {
+      List<String> options = []
       if (this.insecure) {
-          options += "-k "
+          options += "-k"
       }
       if (this.verbose) {
-          options += "--verbose "
+          options += "--verbose"
       }
       return options
   }

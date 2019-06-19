@@ -18,15 +18,15 @@ class ThreescaleService {
 
         def baseName = basename(this.openapi.filename)
         def globalOptions = toolbox.getGlobalToolboxOptions()
-        def commandLine = "3scale import openapi ${globalOptions} -t ${this.environment.targetSystemName} -d ${this.toolbox.destination} /artifacts/${baseName}"
+        def commandLine = [ "3scale", "import", "openapi" ] + globalOptions + [ "-t", this.environment.targetSystemName, "-d", this.toolbox.destination, "/artifacts/${baseName}" ]
         if (this.environment.stagingPublicBaseURL != null) {
-            commandLine += " --staging-public-base-url=${this.environment.stagingPublicBaseURL}"
+            commandLine += "--staging-public-base-url=${this.environment.stagingPublicBaseURL}"
         }
         if (this.environment.productionPublicBaseURL != null) {
-            commandLine += " --production-public-base-url=${this.environment.productionPublicBaseURL}"
+            commandLine += "--production-public-base-url=${this.environment.productionPublicBaseURL}"
         }
         if (this.environment.privateBaseUrl != null) {
-            commandLine += " --override-private-base-url=${this.environment.privateBaseUrl}"
+            commandLine += "--override-private-base-url=${this.environment.privateBaseUrl}"
         }
 
         toolbox.runToolbox(commandLine: commandLine,
@@ -41,9 +41,16 @@ class ThreescaleService {
         def globalOptions = toolbox.getGlobalToolboxOptions()
         this.applicationPlans.each {
             // the issue THREESCALE-2816 for resolving update error
-            def commandLine = "3scale application-plan apply ${globalOptions} ${this.toolbox.destination} ${this.environment.targetSystemName} ${it.systemName} --approval-required=${it.approvalRequired} --cost-per-month=${it.costPerMonth} --end-user-required=${it.endUserRequired} --name=${it.name} --publish=${it.published} --setup-fee=${it.setupFee} --trial-period-days=${it.trialPeriodDays}"
+            def commandLine = [ "3scale", "application-plan", "apply" ] + globalOptions + [ this.toolbox.destination, this.environment.targetSystemName, it.systemName ]
+            commandLine += [ "--approval-required=${it.approvalRequired}",
+                             "--cost-per-month=${it.costPerMonth}",
+                             "--name=${it.name}",
+                             "--publish=${it.published}",
+                             "--setup-fee=${it.setupFee}",
+                             "--trial-period-days=${it.trialPeriodDays}" ]
+
             if (it.defaultPlan) {
-                commandLine += " --default"
+                commandLine += "--default"
             }
 
             toolbox.runToolbox(commandLine: commandLine,
@@ -51,11 +58,35 @@ class ThreescaleService {
         }
     }
 
-    void applyApplication(Map applicationMap) {
+    void applyApplication() {
 
         def globalOptions = toolbox.getGlobalToolboxOptions()
         this.applications.each {
-            def commandLine = "3scale application apply --account=${it.account}  --plan=${it.plan}  --service=${this.environment.targetSystemName} --name=${it.name}  --description=${it.description}  ${globalOptions} ${this.toolbox.destination}   ${it.name} "
+            def commandLine = [ "3scale", "application", "apply" ] + globalOptions + this.toolbox.destination
+            if (this.openapi.securityScheme == ThreescaleSecurityScheme.APIKEY
+             || this.openapi.securityScheme == ThreescaleSecurityScheme.OPEN) {
+
+                commandLine += it.userkey
+            } else if (this.openapi.securityScheme == ThreescaleSecurityScheme.OIDC) {
+                commandLine += [ it.clientId, "--application-key=${it.clientSecret}" ]
+            } else {
+                throw new Exception("NOT_IMPLEMENTED")
+            }
+
+            commandLine += [ "--name=${it.name}",
+                             "--description=${it.description != null ? it.description : "Created by the 3scale_toolbox from a Jenkins pipeline."}",
+                             "--plan=${it.plan}",
+                             "--service=${this.environment.targetSystemName}",
+                             "--account=${it.account}" ]
+
+            // Disabled for now because of https://issues.jboss.org/browse/THREESCALE-2844
+            /*
+            if (it.active) {
+                commandLine += "--resume"
+            } else {
+                commandLine += "--suspend"
+            }
+            */
 
             toolbox.runToolbox(commandLine: commandLine,
                     jobName: "apply-application-${it.name}")
@@ -63,9 +94,10 @@ class ThreescaleService {
     }
 
     Map readProxy(String environment) {
+        assert environment != null
 
         def globalOptions = toolbox.getGlobalToolboxOptions()
-        def commandLine = "3scale proxy-config show ${globalOptions} ${this.toolbox.destination} ${this.environment.targetSystemName} ${environment}"
+        def commandLine = [ "3scale", "proxy-config", "show" ] + globalOptions + [ this.toolbox.destination, this.environment.targetSystemName, environment ]
         def proxyDefinition =toolbox.runToolbox(commandLine: commandLine,
                 jobName: "apply-proxy-config-show")
 
@@ -76,7 +108,7 @@ class ThreescaleService {
 
 
         def globalOptions = toolbox.getGlobalToolboxOptions()
-        def commandLine = "3scale proxy-config promote ${globalOptions} ${this.toolbox.destination} ${this.environment.targetSystemName}"
+        def commandLine = [ "3scale", "proxy-config", "promote" ] + globalOptions + [ this.toolbox.destination, this.environment.targetSystemName ]
         toolbox.runToolbox(commandLine: commandLine,
                 jobName: "apply-proxy-config-promote")
     }
