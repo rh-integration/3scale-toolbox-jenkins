@@ -18,6 +18,7 @@ class OpenAPI2 {
     String version
     String majorVersion
     ThreescaleSecurityScheme securityScheme
+    boolean validateOAS = true
 
     OpenAPI2(Map conf) {
         assert conf.filename != null

@@ -26,34 +26,49 @@ ThreescaleService prepareThreescaleService(Map conf) {
   }
 
 
+  OpenAPI2 openapi = new OpenAPI2(conf.openapi)
+  openapi.parseOpenAPISpecificationFile()
+
+  if (conf.environment.targetSystemName == null) {
+    // Compute the target system_name
+    conf.environment.targetSystemName = (conf.environment.environmentName != null ? "${conf.environment.environmentName}_" : "") + conf.environment.baseSystemName + "_${openapi.majorVersion}"
+  }
+
+  ThreescaleEnvironment environment = new ThreescaleEnvironment(conf.environment)
+  ToolboxConfiguration toolbox = new ToolboxConfiguration(conf.toolbox + ["JOB_BASE_NAME": JOB_BASE_NAME, "BUILD_NUMBER": BUILD_NUMBER])
+
   List<Application> apps = []
   conf.applications.each{
     if (it.account == null || it.name == null) {
       throw new Exception("Missing property in application : name or account")
     }
 
-    Application app = new Application(it)
+    Map credentials = [:]
+    if ((openapi.securityScheme == ThreescaleSecurityScheme.OPEN
+      || openapi.securityScheme == ThreescaleSecurityScheme.APIKEY) && it.userkey == null) {
+
+        credentials = getDefaultApplicationCredentials(environment, toolbox, it.name).findAll { key, value -> key == "userkey" }
+    } else if (openapi.securityScheme == ThreescaleSecurityScheme.OIDC && it.clientId == null && it.clientSecret == null) {
+        credentials = getDefaultApplicationCredentials(environment, toolbox, it.name).findAll { key, value -> key == "clientId" || key == "clientSecret" }
+    }
+
+    Application app = new Application(it + credentials)
     apps.add(app)
   }
 
-
-  OpenAPI2 openapi = new OpenAPI2(conf.openapi)
-  openapi.parseOpenAPISpecificationFile()
-  ThreescaleEnvironment environment = new ThreescaleEnvironment(conf.environment)
-  ToolboxConfiguration toolbox = new ToolboxConfiguration(conf.toolbox + ["JOB_BASE_NAME": JOB_BASE_NAME, "BUILD_NUMBER": BUILD_NUMBER])
   ThreescaleService service = new ThreescaleService([ "openapi": openapi, "environment": environment, "toolbox": toolbox, applicationPlans: plans ,"applications":apps] + conf.service)
 
   return service
 }
 
-Map getDefaultApplicationCredentials(ThreescaleService service, String applicationName) {
-  String targetSystemName = service.environment.targetSystemName
-  String destination = service.toolbox.destination
-  String secretName = service.toolbox.secretName
+Map getDefaultApplicationCredentials(ThreescaleEnvironment environment, ToolboxConfiguration toolbox, String applicationName) {
+  String targetSystemName = environment.targetSystemName
+  String destination = toolbox.destination
+  String secretName = toolbox.secretName
   String secret = ""
   if (secretName != null) {
     openshift.withCluster() {
-      openshift.withProject(service.toolbox.openshiftProject) {
+      openshift.withProject(toolbox.openshiftProject) {
         def secretObject = openshift.selector('secret', secretName).object()
         secret = secretObject.data[".3scalerc.yaml"]
       }
@@ -65,9 +80,8 @@ Map getDefaultApplicationCredentials(ThreescaleService service, String applicati
   def app_id = sha1 file: "app_id"
   def app_secret = sha1 file: "app_secret"
 
-  // TODO: return user_key OR client_id/client_secret depending on the security scheme of the OpenAPI
   return [
-    userKey: app_id,
+    userkey: app_id,
     clientId: app_id,
     clientSecret: app_secret
   ]
