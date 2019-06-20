@@ -33,6 +33,14 @@ class ThreescaleService {
             commandLine += "--oidc-issuer-endpoint=${this.environment.oidcIssuerEndpoint}"
         }
 
+        if (this.environment.privateBasePath != null) {
+            commandLine += "--override-private-basepath=${this.environment.privateBasePath}"
+        }
+
+        if (this.environment.publicBasePath != null) {
+            commandLine += "--override-public-basepath=${this.environment.publicBasePath}"
+        }
+
         if (! this.openapi.validateOAS) {
             commandLine += "--skip-openapi-validation"
         }

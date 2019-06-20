@@ -12,5 +12,7 @@ class ThreescaleEnvironment {
   String oidcIssuerEndpoint
   String publicStagingWildcardDomain
   String publicProductionWildcardDomain
+  String privateBasePath
+  String publicBasePath
 }
 
