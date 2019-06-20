@@ -34,6 +34,15 @@ ThreescaleService prepareThreescaleService(Map conf) {
     conf.environment.targetSystemName = (conf.environment.environmentName != null ? "${conf.environment.environmentName}_" : "") + conf.environment.baseSystemName + "_${openapi.majorVersion}"
   }
 
+  // compute the public base urls from system_name, version number and wildcard domain (for semantic versioning)
+  String apiBaseName = conf.environment.targetSystemName.replaceAll(/[^-0-9a-zA-Z]/, "-").toLowerCase()
+  if (conf.environment.stagingPublicBaseURL == null && conf.environment.publicStagingWildcardDomain != null) {
+    conf.environment.stagingPublicBaseURL = "https://${apiBaseName}.${conf.environment.publicStagingWildcardDomain}"
+  }
+  if (conf.environment.productionPublicBaseURL == null && conf.environment.publicProductionWildcardDomain != null) {
+    conf.environment.productionPublicBaseURL = "https://${apiBaseName}.${conf.environment.publicProductionWildcardDomain}"
+  }
+
   ThreescaleEnvironment environment = new ThreescaleEnvironment(conf.environment)
   ToolboxConfiguration toolbox = new ToolboxConfiguration(conf.toolbox + ["JOB_BASE_NAME": JOB_BASE_NAME, "BUILD_NUMBER": BUILD_NUMBER])
 
