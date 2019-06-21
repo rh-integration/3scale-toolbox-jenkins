@@ -34,11 +34,15 @@ class OpenAPI2 {
     }
 
     void updateTitleWithEnvironmentAndVersion(String environmentName) {
+        String title = this.content.info.title as String
+        String version = this.version as String
+        String newTitle = null
         if (environmentName != null) {
-            this.content.info.title = "${this.content.info.title} (${environmentName.toUpperCase()}, v${this.version})"
+            newTitle = "${title} (${environmentName.toUpperCase()}, v${version})"
         } else {
-            this.content.info.title = "${this.content.info.title} (v${this.version})"
+            newTitle = "${title} (v${version})"
         }
+        this.content.info.title = newTitle
     }
 
     void parseOpenAPISpecificationFile() {
