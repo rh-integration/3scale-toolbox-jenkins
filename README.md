@@ -83,16 +83,7 @@ Add a stage to create the Application Plans:
 Add a global variable and a stage to create the test Application:
 
 ```groovy
-def testApplicationCredentials = null
-
-[...]
-
   stage("Create an Application") {
-    // Patch the test application with default credentials
-    testApplicationCredentials = toolbox.getDefaultApplicationCredentials(service, service.applications[0].name)
-    service.applications[0].setUserkey(testApplicationCredentials.userKey)
-    service.applications[0].setClientId(testApplicationCredentials.clientId)
-    service.applications[0].setClientSecret(testApplicationCredentials.clientSecret)
     service.applyApplication()
   }
 ```
@@ -105,9 +96,9 @@ Add a stage to run your integration tests:
     // to fetch the proxy definition to extract the staging public url
     def proxy = service.readProxy("sandbox")
     sh """set -e +x
-    curl -f -w "ListBeers: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer -H 'api-key: ${testApplicationCredentials.userKey}'
-    curl -f -w "GetBeer: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer/Weissbier -H 'api-key: ${testApplicationCredentials.userKey}'
-    curl -f -w "GetBeer: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer/findByStatus/available -H 'api-key: ${testApplicationCredentials.userKey}'
+    curl -f -w "ListBeers: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer -H 'api-key: ${service.applications[0].userkey}'
+    curl -f -w "GetBeer: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer/Weissbier -H 'api-key: ${service.applications[0].userkey}'
+    curl -f -w "FindBeersByStatus: %{http_code}\n" -o /dev/null -s ${proxy.sandbox_endpoint}/api/beer/findByStatus/available -H 'api-key: ${service.applications[0].userkey}'
     """
   }
 ```

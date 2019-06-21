@@ -12,10 +12,6 @@ class ThreescaleService {
     void importOpenAPI() {
         Util util = new Util()
 
-
-        // Compute the target system_name
-        this.environment.targetSystemName = (this.environment.environmentName != null ? "${this.environment.environmentName}_" : "") + this.environment.baseSystemName + "_${this.openapi.majorVersion}"
-
         def baseName = basename(this.openapi.filename)
         def globalOptions = toolbox.getGlobalToolboxOptions()
         def commandLine = [ "3scale", "import", "openapi" ] + globalOptions + [ "-t", this.environment.targetSystemName, "-d", this.toolbox.destination, "/artifacts/${baseName}" ]
@@ -27,6 +23,26 @@ class ThreescaleService {
         }
         if (this.environment.privateBaseUrl != null) {
             commandLine += "--override-private-base-url=${this.environment.privateBaseUrl}"
+        }
+
+        if (this.openapi.securityScheme == ThreescaleSecurityScheme.OPEN) {
+            commandLine += "--default-credentials-userkey=${this.applications[0].userkey}"
+        }
+
+        if (this.openapi.securityScheme == ThreescaleSecurityScheme.OIDC) {
+            commandLine += "--oidc-issuer-endpoint=${this.environment.oidcIssuerEndpoint}"
+        }
+
+        if (this.environment.privateBasePath != null) {
+            commandLine += "--override-private-basepath=${this.environment.privateBasePath}"
+        }
+
+        if (this.environment.publicBasePath != null) {
+            commandLine += "--override-public-basepath=${this.environment.publicBasePath}"
+        }
+
+        if (! this.openapi.validateOAS) {
+            commandLine += "--skip-openapi-validation"
         }
 
         toolbox.runToolbox(commandLine: commandLine,
