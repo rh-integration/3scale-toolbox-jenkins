@@ -12,7 +12,7 @@ class ThreescaleService {
     void importOpenAPI() {
         Util util = new Util()
 
-        def baseName = basename(this.openapi.filename)
+        def baseName = util.basename(this.openapi.filename)
         def globalOptions = toolbox.getGlobalToolboxOptions()
         def commandLine = [ "3scale", "import", "openapi" ] + globalOptions + [ "-t", this.environment.targetSystemName, "-d", this.toolbox.destination, "/artifacts/${baseName}" ]
         if (this.environment.stagingPublicBaseURL != null) {
@@ -49,7 +49,7 @@ class ThreescaleService {
                 jobName: "import",
                 openAPI: [
                         "filename": baseName,
-                        "content" : util.readFile(this.openapi.filename)
+                        "content" : this.openapi.getUpdatedContent()
                 ])
     }
 
@@ -127,12 +127,6 @@ class ThreescaleService {
         def commandLine = [ "3scale", "proxy-config", "promote" ] + globalOptions + [ this.toolbox.destination, this.environment.targetSystemName ]
         toolbox.runToolbox(commandLine: commandLine,
                 jobName: "apply-proxy-config-promote")
-    }
-
-    static String basename(path) {
-        def filename = path.drop(path.lastIndexOf("/") != -1 ? path.lastIndexOf("/") + 1 : 0)
-        filename = filename.replaceAll("[^-._a-zA-Z0-9]", "_")
-        return filename
     }
 
 }
