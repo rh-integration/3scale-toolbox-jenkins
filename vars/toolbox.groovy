@@ -28,6 +28,7 @@ ThreescaleService prepareThreescaleService(Map conf) {
 
   OpenAPI2 openapi = new OpenAPI2(conf.openapi)
   openapi.parseOpenAPISpecificationFile()
+  openapi.updateTitleWithEnvironmentAndVersion(conf.environment.environmentName)
 
   if (conf.environment.targetSystemName == null) {
     // Compute the target system_name

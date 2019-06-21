@@ -25,6 +25,22 @@ class OpenAPI2 {
         this.filename = conf.filename
     }
 
+    String getUpdatedContent() {
+        Util util = new Util()
+        String baseName = "updated-" + util.basename(this.filename)
+        util.removeFile(baseName)
+        util.writeOpenAPISpecificationFile(baseName, this.content)
+        return util.readFile(baseName)
+    }
+
+    void updateTitleWithEnvironmentAndVersion(String environmentName) {
+        if (environmentName != null) {
+            this.content.info.title = "${this.content.info.title} (${environmentName.toUpperCase()}, v${this.version})"
+        } else {
+            this.content.info.title = "${this.content.info.title} (v${this.version})"
+        }
+    }
+
     void parseOpenAPISpecificationFile() {
         this.content = new Util().readOpenAPISpecificationFile(this.filename)
         assert content.swagger == "2.0"
