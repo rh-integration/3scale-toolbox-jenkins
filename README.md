@@ -35,7 +35,7 @@ Create the `ThreescaleService` with all the relevant information:
         applicationPlans: [
           [ systemName: "test", name: "Test", defaultPlan: true, published: true ],
           [ systemName: "silver", name: "Silver" ],
-          [ systemName: "gold", name: "Gold" ],
+          [ artefactFile: "https://raw.githubusercontent.com/redhatHameed/API-Lifecycle-Mockup/master/testcase-01/plan.yaml"],
         ]
     )
 
@@ -48,7 +48,7 @@ Create the `ThreescaleService` with all the relevant information:
 - `toolbox.openshiftProject` is the OpenShift project in which Kubernetes Jobs will be created
 - `toolbox.secretName` is the name of the [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/) containing the [3scale_toolbox configuration file](https://github.com/3scale/3scale_toolbox/blob/master/docs/remotes.md#options)
 - `toolbox.destination` is the name of the [3scale_toolbox remote](https://github.com/3scale/3scale_toolbox/blob/master/docs/remotes.md)
-- `applicationPlans` is a list of Application Plans to create
+- `applicationPlans` is a list of Application Plans to create, by using artefact yaml File or by providing application plan properties details.
 
 Create the corresponding OpenShift project:
 

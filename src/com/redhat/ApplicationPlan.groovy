@@ -12,4 +12,6 @@ class ApplicationPlan {
     BigDecimal costPerMonth = 0.0
     BigDecimal setupFee = 0.0
     BigInteger trialPeriodDays = 0
+    String artefactFile
+
 }

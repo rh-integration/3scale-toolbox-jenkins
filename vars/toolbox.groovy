@@ -17,8 +17,8 @@ ThreescaleService prepareThreescaleService(Map conf) {
 
   List<ApplicationPlan> plans = []
   conf.applicationPlans.each{
-    if (it.systemName == null || it.name == null) {
-      throw new Exception("Missing property in application plan: name or systemName")
+    if ((it.systemName == null || it.name == null) && !it.artefactFile?.trim()) {
+      throw new Exception("Missing property in application plan: name or systemName or artefactFile ")
     }
 
     ApplicationPlan plan = new ApplicationPlan(it)
