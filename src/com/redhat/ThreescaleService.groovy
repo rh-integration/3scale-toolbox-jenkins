@@ -3,7 +3,7 @@
 package com.redhat
 
 class ThreescaleService {
-    OpenAPI2 openapi
+    OpenAPI openapi
     List<ApplicationPlan> applicationPlans
     List<Application> applications
     ToolboxConfiguration toolbox
