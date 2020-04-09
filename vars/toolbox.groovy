@@ -25,8 +25,15 @@ ThreescaleService prepareThreescaleService(Map conf) {
     plans.add(plan)
   }
 
-
-  OpenAPI2 openapi = new OpenAPI2(conf.openapi)
+  def content = new Util().readOpenAPISpecificationFile(conf.openapi.filename)
+  OpenAPI openapi = null
+  if (content.swagger != null && content.swagger == "2.0") {
+    openapi = new OpenAPI2(conf.openapi + [ content: content ])
+  } else if (content.openapi != null && content.openapi instanceof String && content.openapi.startsWith("3.0")) {
+    openapi = new OpenAPI3(conf.openapi + [ content: content ])
+  } else {
+      throw new Exception("Cannot determine the OpenAPI version from 'openapi: ${content.openapi}' and 'swagger: ${content.swagger}'!")
+  }
   openapi.parseOpenAPISpecificationFile()
   openapi.updateTitleWithEnvironmentAndVersion(conf.environment.environmentName)
 

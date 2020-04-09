@@ -2,7 +2,7 @@
 
 package com.redhat
 
-class OpenAPI2 implements OpenAPI {
+class OpenAPI3 implements OpenAPI {
     String filename
     def content
     String version
@@ -10,7 +10,7 @@ class OpenAPI2 implements OpenAPI {
     ThreescaleSecurityScheme securityScheme
     boolean validateOAS = true
 
-    OpenAPI2(Map conf) {
+    OpenAPI3(Map conf) {
         assert conf.filename != null
         assert conf.content != null
         this.filename = conf.filename
@@ -38,12 +38,14 @@ class OpenAPI2 implements OpenAPI {
     }
 
     void parseOpenAPISpecificationFile() {
-        assert content.swagger == "2.0"
+        assert content.openapi != null
+        assert content.openapi.startsWith("3.0")
         this.version = content.info.version
         assert this.version != null
         this.majorVersion = version.tokenize(".")[0]
 
         String securitySchemeName = null
+        def securityDefinitions = content.components?.securitySchemes
         if (content.security != null && content.security.size() == 1) {
             Set securitySchemes = content.security[0].keySet()
             if (securitySchemes.size() == 1) {
@@ -53,7 +55,7 @@ class OpenAPI2 implements OpenAPI {
             }
 
         } else if ((content.security == null || content.security.size() == 0)
-                && (content.securityDefinitions == null || content.securityDefinitions.size() == 0)) {
+                && (securityDefinitions == null || securityDefinitions.size() == 0)) {
 
             // To make it explicit that this is an Open API, we require no security requirement
             // and no security definition (better be safe than sorry...)
@@ -63,10 +65,10 @@ class OpenAPI2 implements OpenAPI {
         }
 
         if (securitySchemeName != null) {
-            if (content.securityDefinitions != null
-             && content.securityDefinitions.get(securitySchemeName) != null) {
+            if (securityDefinitions != null
+             && securityDefinitions.get(securitySchemeName) != null) {
 
-                Map securityScheme = content.securityDefinitions.get(securitySchemeName)
+                Map securityScheme = securityDefinitions.get(securitySchemeName)
                 String securityType = securityScheme.type
 
                 if (securityType == "oauth2") {
